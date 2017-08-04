@@ -8,23 +8,37 @@ $json = json_decode($data, true);
 if ($f = file_put_contents($logfile, $data."\n", FILE_APPEND)) {
   echo 'log wrote successed'."\n";
 }
-if (!empty($json['commits'])) {
-  for($i = 0; $i < count($json['commits']); $i++) {
+if (empty($json['commits'])) {
+  echo "<br />\n";
+  exit('Error Request');
+}
+for($i = 0; $i < count($json['commits']); $i++) {
+  if (!empty($json['commits'][$i]['modified'])) {
     for($j = 0; $j < count($json['commits'][$i]['modified']); $j++) {
       if (!empty($json['commits'][$i]['modified'][$j])) {
         echo download(
           "https://raw.githubusercontent.com/doudoudzj/random-picture/master/".$json['commits'][$i]['modified'][$j]."?t=".time(),
           "/",
           $json['commits'][$i]['modified'][$j]);
-        if ($f = file_put_contents($logfile, $json['commits'][$i]['modified'][$j]."\n", FILE_APPEND)) {
+        if ($f = file_put_contents($logfile, "modified:".$json['commits'][$i]['modified'][$j]."\n", FILE_APPEND)) {
           echo 'log wrote successed'."\n";
         }
       }
     }
   }
-} else {
-  echo "<br />\n";
-  exit('error request');
+  if (!empty($json['commits'][$i]['added'])) {
+    for($j = 0; $j < count($json['commits'][$i]['added']); $j++) {
+      if (!empty($json['commits'][$i]['added'][$j])) {
+        echo download(
+          "https://raw.githubusercontent.com/doudoudzj/random-picture/master/".$json['commits'][$i]['added'][$j]."?t=".time(),
+          "/",
+          $json['commits'][$i]['added'][$j]);
+        if ($f = file_put_contents($logfile, "added:".$json['commits'][$i]['added'][$j]."\n", FILE_APPEND)) {
+          echo 'log wrote successed'."\n";
+        }
+      }
+    }
+  }
 }
 
 function download($url, $dir, $filename=''){
